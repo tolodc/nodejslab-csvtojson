@@ -1,0 +1,37 @@
+const csv = require('csvtojson')
+const fs = require('fs')
+const path = require('path')
+
+const csvFilePath = 'customer-data.csv'
+const jsonFilePath = 'customar-data.json'
+
+// csv().fromFile(csvFilePath).then((jsonObj)=>{
+//     console.log(jsonObj);
+// })
+
+let buff = ''
+
+const csvtojson = (callback) => {
+	csv().fromFile(csvFilePath)
+		.on('data', (chunk)=>{
+		    const jsonStr = chunk.toString('utf8')
+		    if (buff == '') 
+		    	buff += '[';
+		    else
+		    	buff += ','
+		    buff += jsonStr;
+		})
+		.on('end', () => {
+			buff += ']'
+		    callback(null, buff);
+		})
+		.on('error', (error) => {
+		    callback(error)
+		})
+}
+
+csvtojson((error, data) => {
+	if (error) return console.error("Got error: ${error.message}")
+	fs.writeFileSync(path.join(__dirname, jsonFilePath), data)
+	console.log("Fuck yeah!")
+})
